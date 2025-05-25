@@ -29,10 +29,14 @@ const App = () => {
   return (
     <>
       <Router>
-        <div className="min-h-screen flex flex-col bg-gray-50">
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50">
           <Navbar />
           <main className="flex-1">
-            <Suspense fallback={<LoadingSpinner size="large" message="Loading page..." />}>
+            <Suspense fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <LoadingSpinner size="large" message="Loading page..." />
+              </div>
+            }>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/jobs" element={<Jobs />} />
@@ -56,7 +60,8 @@ const App = () => {
             pauseOnFocusLoss
             draggable
             pauseOnHover
-            className="mt-16"
+            className="mt-16 z-50"
+            toastClassName="rounded-lg shadow-lg"
           />
         </div>
       </Router>

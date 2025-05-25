@@ -1,10 +1,14 @@
+
 import { useEffect, useState } from "react";
 import { useRecoilValue, useRecoilCallback } from "recoil";
 import { Link, useNavigate } from "react-router-dom";
 import { userState } from "../store/atoms";
 import { useUserActions } from "../store/userActions";
 import { toast } from "react-toastify";
-import { FaRegUser } from "react-icons/fa";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import { FaRegUser, FaSignInAlt } from "react-icons/fa";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { RiLock2Fill } from "react-icons/ri";
 
@@ -37,56 +41,89 @@ const Login = () => {
   }, [error, isAuthenticated, navigateTo, clearAllUserErrors]);
 
   return (
-    <>
-    <section className="authPage" style={{ background: '#fff' }}>
-        <div className="container login-container">
-          <div className="header">
-            <h3>Login to your account</h3>
-          </div>
-          <form onSubmit={handleLogin}>
-            <div className="inputTag">
-              <label>Login As</label>
-              <div>
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        {/* Header */}
+        <div className="text-center">
+          <FaSignInAlt className="mx-auto h-12 w-12 text-blue-600 mb-4" />
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+          <p className="text-gray-600">Sign in to your account to continue</p>
+        </div>
+
+        <Card className="bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl">
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Login As
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <div className="relative">
+                <select 
+                  value={role} 
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                  required
+                >
                   <option value="">Select Role</option>
                   <option value="Employer">Login as an Employer</option>
                   <option value="Job Seeker">Login as a Job Seeker</option>
                 </select>
-                <FaRegUser />
+                <FaRegUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
             </div>
-            <div className="inputTag">
-              <label>Email</label>
-              <div>
-                <input
-                  type="email"
-                  placeholder="youremail@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <MdOutlineMailOutline />
-              </div>
+
+            {/* Email */}
+            <div>
+              <Input
+                label="Email Address"
+                type="email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-            <div className="inputTag">
-              <label>Password</label>
-              <div>
-                <input
-                  type="password"
-                  placeholder="Your Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <RiLock2Fill />
-              </div>
+
+            {/* Password */}
+            <div>
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
-            <button type="submit" disabled={loading}>
-              Login
-            </button>
-            <Link to={"/register"}>Register Now</Link>
+
+            {/* Submit Button */}
+            <Button 
+              type="submit" 
+              disabled={loading}
+              loading={loading}
+              variant="primary"
+              className="w-full py-3 text-lg font-semibold"
+            >
+              {loading ? 'Signing In...' : 'Sign In'}
+            </Button>
+
+            {/* Register Link */}
+            <div className="text-center">
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <Link 
+                  to="/register" 
+                  className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+                >
+                  Register Now
+                </Link>
+              </p>
+            </div>
           </form>
-        </div>
-      </section>
-    </>
+        </Card>
+      </div>
+    </div>
   );
 };
 
