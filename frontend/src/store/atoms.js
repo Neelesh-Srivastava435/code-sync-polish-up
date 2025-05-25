@@ -1,8 +1,12 @@
+
 // atoms.js
 import { atom } from 'recoil';
 import { recoilPersist } from 'recoil-persist';
 
-const { persistAtom } = recoilPersist();
+const { persistAtom } = recoilPersist({
+  key: 'jobPortal',
+  storage: localStorage,
+});
 
 // Atom for user state
 export const userState = atom({
@@ -27,6 +31,13 @@ export const jobsState = atom({
     message: null,
     singleJob: {},
     myJobs: [],
+    totalJobs: 0,
+    currentPage: 1,
+    filters: {
+      city: '',
+      niche: '',
+      searchKeyword: '',
+    },
   },
 });
 
@@ -38,6 +49,8 @@ export const applicationsState = atom({
     loading: false,
     error: null,
     message: null,
+    totalApplications: 0,
+    currentPage: 1,
   },
 });
 
@@ -48,5 +61,28 @@ export const updateProfileState = atom({
     loading: false,
     error: null,
     isUpdated: false,
+  },
+});
+
+// Atom for UI state
+export const uiState = atom({
+  key: 'uiState',
+  default: {
+    sidebarOpen: false,
+    mobileMenuOpen: false,
+    theme: 'light',
+    notifications: [],
+  },
+});
+
+// Atom for search filters
+export const searchFiltersState = atom({
+  key: 'searchFiltersState',
+  default: {
+    location: '',
+    jobType: '',
+    salaryRange: { min: 0, max: 1000000 },
+    experience: '',
+    sortBy: 'newest',
   },
 });

@@ -1,44 +1,64 @@
+
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import Jobs from "./pages/Jobs";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import PostApplication from "./pages/PostApplication";
-import Register from "./pages/Register";
+import LoadingSpinner from "./components/ui/LoadingSpinner";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUserActions } from "./store/userActions";
 import { useEffect } from "react";
 
-const App = () => {
+// Lazy load components for better performance
+const Home = lazy(() => import("./pages/Home"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Jobs = lazy(() => import("./pages/Jobs"));
+const Login = lazy(() => import("./pages/Login"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PostApplication = lazy(() => import("./pages/PostApplication"));
+const Register = lazy(() => import("./pages/Register"));
 
+const App = () => {
   const { getUser } = useUserActions();
 
   useEffect(() => {
     getUser();
   }, []); 
+
   return (
     <>
       <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route
-            path="/post/application/:jobId"
-            element={<PostApplication />}
+        <div className="min-h-screen flex flex-col bg-gray-50">
+          <Navbar />
+          <main className="flex-1">
+            <Suspense fallback={<LoadingSpinner size="large" message="Loading page..." />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/post/application/:jobId" element={<PostApplication />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </main>
+          <Footer />
+          <ToastContainer 
+            position="top-right" 
+            theme="light"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            className="mt-16"
           />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Footer />
-        <ToastContainer position="top-right" theme="dark" />
+        </div>
       </Router>
     </>
   );
