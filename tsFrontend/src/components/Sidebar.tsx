@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/hooks/reduxHooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Activity, Building, BookOpen, Users, User, FileText, LogOut, Settings, Package, Calendar } from 'lucide-react';
 
 // Logo component
@@ -79,7 +79,7 @@ const SettingsSubmenu: React.FC = () => {
 const Sidebar: React.FC = () => {
   const [settingsExpanded, setSettingsExpanded] = React.useState(false);
   const {signOut} = useAuth();
-
+  const { canViewUsers, canViewVenues, canViewBatches } = usePermissions();
 
   // Check if the current route is a settings route
   const isSettingsRoute = () => {
@@ -108,9 +108,19 @@ const Sidebar: React.FC = () => {
       
       <nav className="flex-1 px-4 space-y-1">
         <MenuItem to="/dashboard" icon={Activity} label="Admin Dashboard" />
-        <MenuItem to="/users" icon={Users} label="User Management" />
-        <MenuItem to="/venues" icon={Building} label="Venue Management" />
-        <MenuItem to="/batches" icon={BookOpen} label="Batch Management" />
+        
+        {canViewUsers() && (
+          <MenuItem to="/users" icon={Users} label="User Management" />
+        )}
+        
+        {canViewVenues() && (
+          <MenuItem to="/venues" icon={Building} label="Venue Management" />
+        )}
+        
+        {canViewBatches() && (
+          <MenuItem to="/batches" icon={BookOpen} label="Batch Management" />
+        )}
+        
         <MenuItem to="/partners" icon={FileText} label="Partner Management" />
         <MenuItem to="/members" icon={Users} label="Member Management" />
         <MenuItem 

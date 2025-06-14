@@ -1,46 +1,45 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Upload } from 'lucide-react';
-import ImportUsersDialog from './ImportUsersDialog';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface UserHeaderProps {
   title: string;
 }
 
 const UserHeader: React.FC<UserHeaderProps> = ({ title }) => {
-  const navigate = useNavigate();
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const { canCreateUsers } = usePermissions();
 
   return (
-    <>
-      <div className="flex flex-col md:flex-row md:items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight animate-fade-in mb-4 md:mb-0">
-          {title}
-        </h1>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={() => setImportDialogOpen(true)}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
-          >
-            <Upload size={18} />
-            <span>Import CSV</span>
-          </button>
-          <button
-            onClick={() => navigate('/users/new')}
-            className="flex items-center gap-2 bg-brand-purple text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700 transition-colors"
-          >
-            <PlusCircle size={18} />
-            <span>Add New User</span>
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight animate-fade-in">
+        {title}
+      </h1>
       
-      <ImportUsersDialog 
-        open={importDialogOpen} 
-        onOpenChange={setImportDialogOpen} 
-      />
-    </>
+      {canCreateUsers() && (
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 justify-center"
+          >
+            <Upload size={16} />
+            <span className="text-sm">Import Users</span>
+          </Button>
+          
+          <Button 
+            asChild
+            className="flex items-center gap-2 justify-center"
+          >
+            <Link to="/users/new">
+              <Plus size={16} />
+              <span className="text-sm">Add New User</span>
+            </Link>
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Foundation\Application;
@@ -7,22 +8,50 @@ use Illuminate\Foundation\Configuration\Middleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',   // <-- just this one
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/admin.php'));
+            
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/batch.php'));
+                
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/venue.php'));
+                
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/partner.php'));
+                
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/member.php'));
+                
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/program.php'));
+                
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/amenities.php'));
+                
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/attendance.php'));
+                
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/activity-logs.php'));
+        }
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->web(append: [
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-        ]);
-
-        // Remove SPA‐stateful middleware since you're using token auth
-        $middleware->api(append: [
-            // 'throttle:60,1',
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        $middleware->alias([
+            'check.permissions' => \App\Http\Middleware\CheckPermissions::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

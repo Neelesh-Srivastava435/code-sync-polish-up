@@ -10,7 +10,9 @@ import AddBatchForm from '@/components/Batch/AddBatchForm';
 import EditBatchForm from '@/components/Batch/EditBatchForm';
 import FixedAssetsInventory from '@/components/Batch/FixedAssetsInventory';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation and useNavigate
+import { useLocation, useNavigate } from 'react-router-dom';
+import PermissionWrapper from '@/components/PermissionWrapper';
+import { usePermissions } from '@/hooks/usePermissions';
 
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks/hooks';
 import { fetchBatches, addBatch, updateBatch } from '@/store/batch/batchSlice';
@@ -23,9 +25,10 @@ const BatchManagement: React.FC = () => {
   const [selectedBatch, setSelectedBatch] = useState<BatchType | null>(null);
   const { toast } = useToast();
   const dispatch = useAppDispatch();
-  const location = useLocation(); // Get location object
-  const navigate = useNavigate(); // Get navigate function
+  const location = useLocation();
+  const navigate = useNavigate();
   const { batches, loading, error } = useAppSelector((state) => state.batch);
+  const { canCreateBatches } = usePermissions();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,8 +52,6 @@ const BatchManagement: React.FC = () => {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, navigate, location.pathname]);
-
-
 
   const handleCloseAddBatch = () => {
     setIsAddBatchOpen(false);
@@ -87,75 +88,81 @@ const BatchManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight animate-fade-in">
-          Batch Management
-        </h1>
-        <Button 
-          onClick={() => setIsAddBatchOpen(true)} 
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Add Batch
-        </Button>
-      </div>
+    <PermissionWrapper module="batches" action="view">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold tracking-tight animate-fade-in">
+            Batch Management
+          </h1>
+          {canCreateBatches() && (
+            <Button 
+              onClick={() => setIsAddBatchOpen(true)} 
+              className="flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Add Batch
+            </Button>
+          )}
+        </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-fade-in">
-        <Tabs 
-          defaultValue="overview" 
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="mb-6">
-            <TabsTrigger value="overview">Batch Overview</TabsTrigger>
-            <TabsTrigger value="sessions">Session Routine</TabsTrigger>
-            <TabsTrigger value="reporting">Reporting</TabsTrigger>
-            <TabsTrigger value="inventory">Inventory</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="mt-2">
-            <BatchList 
-              onEditBatch={handleEditBatch} 
-              batches={batches} 
-              loading={loading} 
-              error={error} 
-              selectedBatch={selectedBatch}
-              isEditBatchOpen={isEditBatchOpen}
-              onCloseEditBatch={() => {
-                setIsEditBatchOpen(false);
-                setSelectedBatch(null);
-              }}
-              onSubmitEditBatch={handleUpdateBatchSubmit}
-            />
-          </TabsContent>
-          
-          <TabsContent value="sessions" className="mt-2">
-            <SessionRoutine />
-          </TabsContent>
-          
-          <TabsContent value="reporting" className="mt-2">
-            <BatchReporting />
-          </TabsContent>
-          
-          <TabsContent value="inventory" className="mt-2">
-            <FixedAssetsInventory />
-          </TabsContent>
-        </Tabs>
-      </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-fade-in">
+          <Tabs 
+            defaultValue="overview" 
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="mb-6">
+              <TabsTrigger value="overview">Batch Overview</TabsTrigger>
+              <TabsTrigger value="sessions">Session Routine</TabsTrigger>
+              <TabsTrigger value="reporting">Reporting</TabsTrigger>
+              <TabsTrigger value="inventory">Inventory</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview" className="mt-2">
+              <BatchList 
+                onEditBatch={handleEditBatch} 
+                batches={batches} 
+                loading={loading} 
+                error={error} 
+                selectedBatch={selectedBatch}
+                isEditBatchOpen={isEditBatchOpen}
+                onCloseEditBatch={() => {
+                  setIsEditBatchOpen(false);
+                  setSelectedBatch(null);
+                }}
+                onSubmitEditBatch={handleUpdateBatchSubmit}
+              />
+            </TabsContent>
+            
+            <TabsContent value="sessions" className="mt-2">
+              <SessionRoutine />
+            </TabsContent>
+            
+            <TabsContent value="reporting" className="mt-2">
+              <BatchReporting />
+            </TabsContent>
+            
+            <TabsContent value="inventory" className="mt-2">
+              <FixedAssetsInventory />
+            </TabsContent>
+          </Tabs>
+        </div>
 
-      <Sheet open={isAddBatchOpen} onOpenChange={setIsAddBatchOpen}>
-        <SheetContent side="right"  
-            className="sm:max-w-3xl p-0 overflow-y-auto [&>button]:!right-6 [&>button]:!top-6 [&>button]:!h-9 [&>button]:!w-9 [&>button]:!rounded-full [&>button]:!border [&>button]:!bg-white [&>button]:hover:!bg-gray-50 [&>button]:!flex [&>button]:!items-center [&>button]:!justify-center [&>button.close-button]:!transition-all [&>button]:hover:!border-gray-400">
-          <AddBatchForm 
-            onClose={handleCloseAddBatch} 
-            onBatchAdded={handleBatchAdded}
-            showSpotSelection={true}
-          />
-        </SheetContent>
-      </Sheet>
-    </div>
+        {canCreateBatches() && (
+          <Sheet open={isAddBatchOpen} onOpenChange={setIsAddBatchOpen}>
+            <SheetContent side="right"  
+                className="sm:max-w-3xl p-0 overflow-y-auto [&>button]:!right-6 [&>button]:!top-6 [&>button]:!h-9 [&>button]:!w-9 [&>button]:!rounded-full [&>button]:!border [&>button]:!bg-white [&>button]:hover:!bg-gray-50 [&>button]:!flex [&>button]:!items-center [&>button]:!justify-center [&>button.close-button]:!transition-all [&>button]:hover:!border-gray-400">
+              <AddBatchForm 
+                onClose={handleCloseAddBatch} 
+                onBatchAdded={handleBatchAdded}
+                showSpotSelection={true}
+              />
+            </SheetContent>
+          </Sheet>
+        )}
+      </div>
+    </PermissionWrapper>
   );
 };
 

@@ -11,6 +11,7 @@ import { validateFormData } from '@/utils/userValidation';
 import { format } from 'date-fns';
 import * as userActions from '@/store/user/userSlice';
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks/hooks';
+import PermissionWrapper from '@/components/PermissionWrapper';
 
 type UserRole = string;
 type UserStatus = 'Active' | 'Inactive' | 'Pending';
@@ -250,7 +251,6 @@ const AddNewUser: React.FC = () => {
     }
   };
 
-
   const triggerProfileImageUpload = () => {
     fileInputRef.current?.click();
   };
@@ -277,311 +277,313 @@ const AddNewUser: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => navigate('/users')}
-          className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-        >
-          <ChevronLeft size={24} className="text-gray-500" />
-        </button>
-        <h1 className="text-3xl font-bold tracking-tight animate-fade-in">
-          Add New User
-        </h1>
-      </div>
+    <PermissionWrapper module="users" action="create">
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/users')}
+            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <ChevronLeft size={24} className="text-gray-500" />
+          </button>
+          <h1 className="text-3xl font-bold tracking-tight animate-fade-in">
+            Add New User
+          </h1>
+        </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-fade-in">
-        <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full md:w-auto grid-cols-3 mb-6">
-            <TabsTrigger value="basic">Basic Information</TabsTrigger>
-            <TabsTrigger value="permissions">Permissions</TabsTrigger>
-            <TabsTrigger value="additional">Additional Details</TabsTrigger>
-          </TabsList>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-fade-in">
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full md:w-auto grid-cols-3 mb-6">
+              <TabsTrigger value="basic">Basic Information</TabsTrigger>
+              <TabsTrigger value="permissions">Permissions</TabsTrigger>
+              <TabsTrigger value="additional">Additional Details</TabsTrigger>
+            </TabsList>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <TabsContent value="basic" className="space-y-6">
-              <div className="flex flex-col items-center md:flex-row md:items-start gap-6">
-                {/* Wrapper for Profile Image and Recommendation Text */}
-                <div className="flex flex-col items-center">
-                  <div className="w-32 h-32 relative rounded-full bg-gray-100 flex items-center justify-center">
-                    {previewUrl ? (
-                      <img
-                        src={previewUrl}
-                        alt="Profile Preview"
-                        className="w-full h-full rounded-full object-cover"
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <TabsContent value="basic" className="space-y-6">
+                <div className="flex flex-col items-center md:flex-row md:items-start gap-6">
+                  {/* Wrapper for Profile Image and Recommendation Text */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-32 h-32 relative rounded-full bg-gray-100 flex items-center justify-center">
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt="Profile Preview"
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <User size={48} className="text-gray-400" />
+                      )}
+                      <button
+                        type="button"
+                        onClick={triggerProfileImageUpload}
+                        className="absolute bottom-0 right-0 bg-brand-purple text-white p-2 rounded-full shadow-md hover:bg-purple-700 transition-colors"
+                      >
+                        <Upload size={16} />
+                      </button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleProfileImageChange}
+                        accept="image/*"
+                        className="hidden"
                       />
-                    ) : (
-                      <User size={48} className="text-gray-400" />
-                    )}
-                    <button
-                      type="button"
-                      onClick={triggerProfileImageUpload}
-                      className="absolute bottom-0 right-0 bg-brand-purple text-white p-2 rounded-full shadow-md hover:bg-purple-700 transition-colors"
-                    >
-                      <Upload size={16} />
-                    </button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleProfileImageChange}
-                      accept="image/*"
-                      className="hidden"
-                    />
+                    </div>
+                    <div className="text-sm text-gray-500 text-center mt-2">
+                      <p>Recommended: Square image, at least 300x300px</p>
+                      <p>Images below 2MB should be uploaded.</p>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500 text-center mt-2">
-                    <p>Recommended: Square image, at least 300x300px</p>
-                    <p>Images below 2MB should be uploaded.</p>
+
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    <div className="space-y-2">
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                        First Name*
+                      </label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                        Last Name*
+                      </label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        Email*
+                      </label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                        Phone Number*
+                      </label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={handleChange}
+                        maxLength={10} // Restrict input to 10 characters
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                        Role*
+                      </label>
+                      <select
+                        id="role"
+                        name="role"
+                        required
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple transition duration-200"
+                        value={formData.role}
+                        onChange={handleChange}
+                      >
+                        <option value="Admin">Admin</option>
+                        <option value="Account Manager">Account Manager</option>
+                        <option value="Facility Manager">Facility Manager</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                        Status*
+                      </label>
+                      <select
+                        id="status"
+                        name="status"
+                        required
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple transition duration-200"
+                        value={formData.status}
+                        onChange={handleChange}
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="Pending">Pending</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
+              </TabsContent>
 
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              <TabsContent value="permissions">
+                <UserPermissions
+                  values={formData.permissions}
+                  onChange={handlePermissionsChange}
+                />
+              </TabsContent>
+
+              <TabsContent value="additional" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                      First Name*
+                    <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
+                      Date of Birth
                     </label>
                     <Input
-                      id="firstName"
-                      name="firstName"
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={handleChange}
+                      max={getMaxDateForDOB()} // Add max attribute here
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="employeeCode" className="block text-sm font-medium text-gray-700">
+                      Employee Code
+                    </label>
+                    <Input
+                      id="employeeCode"
+                      name="employeeCode"
                       type="text"
-                      required
-                      value={formData.firstName}
+                      value={formData.employeeCode}
                       onChange={handleChange}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                      Last Name*
+                    <label htmlFor="joiningDate" className="block text-sm font-medium text-gray-700">
+                      Joining Date
                     </label>
                     <Input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      required
-                      value={formData.lastName}
+                      id="joiningDate"
+                      name="joiningDate"
+                      type="date"
+                      value={formData.joiningDate}
                       onChange={handleChange}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                      Email*
+                    <label htmlFor="alternateContact" className="block text-sm font-medium text-gray-700">
+                      Alternate Contact
                     </label>
                     <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                      Phone Number*
-                    </label>
-                    <Input
-                      id="phone"
-                      name="phone"
+                      id="alternateContact"
+                      name="alternateContact"
                       type="tel"
-                      required
-                      value={formData.phone}
+                      value={formData.alternateContact}
                       onChange={handleChange}
                       maxLength={10} // Restrict input to 10 characters
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                      Role*
+                  <div className="space-y-2 md:col-span-2">
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                      Address
                     </label>
-                    <select
-                      id="role"
-                      name="role"
-                      required
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple transition duration-200"
-                      value={formData.role}
+                    <Textarea
+                      id="address"
+                      name="address"
+                      rows={3}
+                      value={formData.address}
                       onChange={handleChange}
-                    >
-                      <option value="Admin">Admin</option>
-                      <option value="Account Manager">Account Manager</option>
-                      <option value="Facility Manager">Facility Manager</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                      Status*
-                    </label>
-                    <select
-                      id="status"
-                      name="status"
-                      required
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple transition duration-200"
-                      value={formData.status}
-                      onChange={handleChange}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                      <option value="Pending">Pending</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="permissions">
-              <UserPermissions
-                values={formData.permissions}
-                onChange={handlePermissionsChange}
-              />
-            </TabsContent>
-
-            <TabsContent value="additional" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
-                    Date of Birth
-                  </label>
-                  <Input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
-                    max={getMaxDateForDOB()} // Add max attribute here
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="employeeCode" className="block text-sm font-medium text-gray-700">
-                    Employee Code
-                  </label>
-                  <Input
-                    id="employeeCode"
-                    name="employeeCode"
-                    type="text"
-                    value={formData.employeeCode}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="joiningDate" className="block text-sm font-medium text-gray-700">
-                    Joining Date
-                  </label>
-                  <Input
-                    id="joiningDate"
-                    name="joiningDate"
-                    type="date"
-                    value={formData.joiningDate}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="alternateContact" className="block text-sm font-medium text-gray-700">
-                    Alternate Contact
-                  </label>
-                  <Input
-                    id="alternateContact"
-                    name="alternateContact"
-                    type="tel"
-                    value={formData.alternateContact}
-                    onChange={handleChange}
-                    maxLength={10} // Restrict input to 10 characters
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Address
-                  </label>
-                  <Textarea
-                    id="address"
-                    name="address"
-                    rows={3}
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="min-h-[100px]"
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Documents & Certificates
-                  </label>
-
-                  <div className="border border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={triggerDocumentsUpload}
-                      className="px-4 py-2 bg-brand-purple text-white rounded-md hover:bg-purple-700 transition-colors"
-                    >
-                      <Upload className="inline-block mr-2" size={16} />
-                      Upload Documents
-                    </button>
-                    <p className="text-sm text-gray-500 mt-2">Upload certificates, ID proof, or other documents</p>
-                    <input
-                      type="file"
-                      ref={documentInputRef}
-                      onChange={handleDocumentsChange}
-                      multiple
-                      className="hidden"
+                      className="min-h-[100px]"
                     />
                   </div>
 
-                  {formData.documents.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-sm font-medium">Uploaded Documents:</p>
-                      <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
-                        {formData.documents.map((file, index) => (
-                          <li key={`new-${index}-${file.name}`} className="flex items-center justify-between p-3 hover:bg-gray-50">
-                            <div className="flex-1 min-w-0">
-                              <span className="text-sm font-medium text-gray-800 truncate block" title={file.name}>
-                                {file.name}
-                              </span>
-                              <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</span>
-                            </div>
-                            <div>
-                              <button
-                                type="button"
-                                onClick={() => removeDocument(index)}
-                                className="ml-3 text-red-500 hover:text-red-700 text-sm"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Documents & Certificates
+                    </label>
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <button
-                type="button"
-                onClick={() => navigate('/users')}
-                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 rounded-lg bg-brand-purple text-white font-medium shadow-sm hover:bg-purple-700 transition-colors"
-                disabled={isUserLoading} // Use loading state from Redux
-              >
-                {isUserLoading ? 'Creating...' : 'Create User'}
-              </button>
-            </div>
-          </form>
-        </Tabs>
+                    <div className="border border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={triggerDocumentsUpload}
+                        className="px-4 py-2 bg-brand-purple text-white rounded-md hover:bg-purple-700 transition-colors"
+                      >
+                        <Upload className="inline-block mr-2" size={16} />
+                        Upload Documents
+                      </button>
+                      <p className="text-sm text-gray-500 mt-2">Upload certificates, ID proof, or other documents</p>
+                      <input
+                        type="file"
+                        ref={documentInputRef}
+                        onChange={handleDocumentsChange}
+                        multiple
+                        className="hidden"
+                      />
+                    </div>
+
+                    {formData.documents.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium">Uploaded Documents:</p>
+                        <ul className="divide-y divide-gray-200 rounded-md border border-gray-200">
+                          {formData.documents.map((file, index) => (
+                            <li key={`new-${index}-${file.name}`} className="flex items-center justify-between p-3 hover:bg-gray-50">
+                              <div className="flex-1 min-w-0">
+                                <span className="text-sm font-medium text-gray-800 truncate block" title={file.name}>
+                                  {file.name}
+                                </span>
+                                <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</span>
+                              </div>
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeDocument(index)}
+                                  className="ml-3 text-red-500 hover:text-red-700 text-sm"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <button
+                  type="button"
+                  onClick={() => navigate('/users')}
+                  className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-brand-purple text-white font-medium shadow-sm hover:bg-purple-700 transition-colors"
+                  disabled={isUserLoading} // Use loading state from Redux
+                >
+                  {isUserLoading ? 'Creating...' : 'Create User'}
+                </button>
+              </div>
+            </form>
+          </Tabs>
+        </div>
       </div>
-    </div>
+    </PermissionWrapper>
   );
 };
 

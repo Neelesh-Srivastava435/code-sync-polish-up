@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { UserData } from '@/types/user';
 import ResetPasswordDialog from './ResetPasswordDialog';
 import { formatBackendError } from '@/utils/errorHandling';
+import { usePermissions } from '@/hooks/usePermissions';
 
 // Sample data for initial state with permissions and address
 // const initialUsers: User[] = [
@@ -143,7 +144,7 @@ const StatusBadge: React.FC<{ status: UserData['status'] }> = ({ status }) => {
   );
 };
 
-// Action Menu component
+// Action Menu component with permission checks
 interface ActionMenuProps {
   user: UserData;
   onEdit: (user: UserData) => void;
@@ -157,6 +158,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { canEditUsers, canDeleteUsers } = usePermissions();
 
   // Close menu when clicking outside
   React.useEffect(() => {
@@ -186,20 +188,24 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
       {isOpen && (
         <div className="table-action-menu">
           <div className="py-1">
-            <button 
-              onClick={() => { onEdit(user); setIsOpen(false); }}
-              className="table-action-item"
-            >
-              <Edit size={16} className="mr-2" />
-              Edit
-            </button>
-            <button 
-              onClick={() => { onResetPassword(user); setIsOpen(false); }}
-              className="table-action-item"
-            >
-              <Key size={16} className="mr-2" />
-              Reset Password
-            </button>
+            {canEditUsers() && (
+              <button 
+                onClick={() => { onEdit(user); setIsOpen(false); }}
+                className="table-action-item"
+              >
+                <Edit size={16} className="mr-2" />
+                Edit
+              </button>
+            )}
+            {canEditUsers() && (
+              <button 
+                onClick={() => { onResetPassword(user); setIsOpen(false); }}
+                className="table-action-item"
+              >
+                <Key size={16} className="mr-2" />
+                Reset Password
+              </button>
+            )}
             <button 
               onClick={() => { onSendEmail(user); setIsOpen(false); }}
               className="table-action-item"
@@ -207,13 +213,15 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
               <Mail size={16} className="mr-2" />
               Send Email
             </button>
-            <button 
-              onClick={() => { onDeactivate(user); setIsOpen(false); }}
-              className={`table-action-item ${isActive ? 'table-action-item-destructive' : 'table-action-item-success'}`}
-            >
-              <Power size={16} className="mr-2" />
-              {isActive ? 'Deactivate' : 'Activate'}
-            </button>
+            {canDeleteUsers() && (
+              <button 
+                onClick={() => { onDeactivate(user); setIsOpen(false); }}
+                className={`table-action-item ${isActive ? 'table-action-item-destructive' : 'table-action-item-success'}`}
+              >
+                <Power size={16} className="mr-2" />
+                {isActive ? 'Deactivate' : 'Activate'}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -276,6 +284,7 @@ const UserList: React.FC = () => {
   const usersPerPage = 10;
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { canEditUsers, canDeleteUsers } = usePermissions();
 
   // Use the custom error handling hook
   useUserError();
@@ -286,7 +295,15 @@ const UserList: React.FC = () => {
   }, [dispatch]);
 
   const handleEdit = (user: UserData) => {
-    navigate(`/users/edit/${user.id}`);
+    if (canEditUsers()) {
+      navigate(`/users/edit/${user.id}`);
+    } else {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to edit users.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleResetPassword = (user: UserData) => {
@@ -299,6 +316,15 @@ const UserList: React.FC = () => {
   };
 
   const handleDeactivate = async (user: UserData) => {
+    if (!canDeleteUsers()) {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to modify user status.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const isActivating = user.status === 'Inactive';
     const actionWord = isActivating ? 'activate' : 'deactivate';
     
@@ -310,7 +336,6 @@ const UserList: React.FC = () => {
           description: `User ${actionWord}d successfully.`,
         });
       } catch (error: any) {
-        // Error will be handled by the useUserError hook
         console.error(`Error ${actionWord}ing user:`, error);
       }
     }
